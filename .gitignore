@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+data/
+artifacts/
+cache/
+.pytest_cache/
+.local/
+catboost_info/
+deliverables/*
+!deliverables/f1-lab-demo.zip
+*.log
+.streamlit/secrets.toml
