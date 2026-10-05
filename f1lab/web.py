@@ -57,6 +57,7 @@ def render_sync_status(engine):
     state = SyncService(engine).status()
     stamp = state.get("last_calendar_success")
     revision = state.get("finished_at")
+    known_revision = "source_revision" in st.session_state
     previous = st.session_state.get("source_revision")
     st.session_state["source_revision"] = revision
     if revision and revision != previous:
@@ -64,7 +65,7 @@ def render_sync_status(engine):
         read_table.clear()
         from .analysis.web import analysis_frame
         analysis_frame.clear()
-        if previous is not None:
+        if known_revision:
             st.rerun()
     with st.sidebar:
         st.caption("Tự đồng bộ 15 phút/lần khi ứng dụng đang chạy. Lịch lấy từ nguồn, không cố định tên chặng.")

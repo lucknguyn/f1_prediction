@@ -92,6 +92,41 @@ erDiagram
         varchar name
         float value
     }
+    races ||--o{ weekend_sessions : schedules
+    weekend_sessions ||--o{ weekend_results : classifies
+    drivers ||--o{ weekend_results : participates
+    teams ||--o{ weekend_results : assigns
+    weekend_sessions ||--o{ weekend_runs : forecasts
+    weekend_runs ||--o{ weekend_predictions : generates
+    drivers ||--o{ weekend_predictions : ranked
+    weekend_sessions {
+        varchar id PK
+        int race_id FK
+        varchar kind
+        datetime start_utc
+        datetime cutoff_utc
+        varchar status
+    }
+    weekend_results {
+        varchar session_id PK,FK
+        varchar driver_id PK,FK
+        varchar team_id FK
+        int position
+        float best_seconds
+    }
+    weekend_runs {
+        varchar id PK
+        varchar session_id FK
+        datetime cutoff_utc
+        varchar model
+    }
+    weekend_predictions {
+        varchar run_id PK,FK
+        varchar driver_id PK,FK
+        int rank
+        int actual_rank
+        json features
+    }
     ingestion_runs {
         varchar id PK
         datetime created_at

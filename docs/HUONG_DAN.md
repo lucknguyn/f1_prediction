@@ -119,3 +119,13 @@ Model joblib chỉ tải từ artifact do dự án tạo, không nhận upload f
 - **Không tải được mùa/phiên:** kiểm tra mạng, log ingestion_runs và raw cache; tải lại hữu hạn, không xóa dữ liệu đã tải thành công.
 - **Model không cùng feature version:** train lại theo protocol đã chốt, không lặng lẽ bỏ feature.
 - **Không có metric F1-score:** v1 dự đoán thứ hạng; F1-score thuộc phần classifier mở rộng.
+
+## Cập nhật kiến trúc và giao diện 06/10/2026
+
+Từ bản chia module, web có bốn mục Dự đoán, Phân tích, Mô hình, Dữ liệu. Tên các trang Tổng quan/Học & bảo vệ trong hướng dẫn cũ là của bản trước; nội dung học nằm trong docs. Q→Race ở lựa chọn đối chứng trong trang Dự đoán; trước cuối tuần là mặc định.
+
+Tự đồng bộ bật mặc định, 15 phút/lượt khi web và MySQL hoạt động, năm từ đồng hồ UTC. Kết quả nguồn chậm không biến thành dữ liệu giả. Đọc sidebar để biết mốc nguồn. Để cập nhật ngay: `python -m f1lab sync --force`; demo offline: `F1_AUTO_SYNC=0 python -m streamlit run app.py`.
+
+`python -m f1lab analyze --season 2025` sinh CSV/PNG thống kê, phân cụm và radar trong data/processed/analysis. `python radarChartPlot.py --p1 norris --p2 max_verstappen --season 2025` sinh deliverables/radar.png. Dùng driver_id có trong driver_season.csv, không dùng tên hiển thị tùy ý.
+
+Đọc SYSTEM_MODULES.md và DOI_CHIEU_DE_BAI.md để biết mỗi yêu cầu được thực hiện ở đâu. Bản báo cáo Word và ZIP ở deliverables. Báo cáo Word là snapshot nộp bài; `report` tạo lại báo cáo Markdown Q→Race và schema, không tự cập nhật Word.

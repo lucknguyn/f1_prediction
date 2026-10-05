@@ -1,33 +1,20 @@
-"""Dự đoán riêng từng phiên từ lịch sử trước cuối tuần, không dùng Q hiện tại."""
-from __future__ import annotations
-
+"""Chiến lược mô hình và huấn luyện theo thời gian cho từng loại phiên."""
 import hashlib
 import json
 import uuid
-from datetime import timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import fastf1
 import joblib
 import numpy as np
 import pandas as pd
-from sqlalchemy import delete, text
-from sqlalchemy.orm import Session
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
 from ..config import AppConfig
-from ..db import (Driver, Team, WeekendSession, WeekendResult, WeekendRun,
-                 WeekendPrediction, utcnow)
-from ..ingest import FastF1DataSource
+from ..db import utcnow
 from ..ml import RaceEvaluator
 from ..models import RaceModel
-from ..repositories import ResultRepository
-
 from .common import NUMERIC, CATEGORICAL, FEATURES, LABELS, VERSION
 from .repository import WeekendRepository
 from .features import WeekendFeatureBuilder

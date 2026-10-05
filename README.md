@@ -1,19 +1,8 @@
-# F1 Race Predictor 2026
+# F1 Lab — bài tập lớn Python và Cơ sở dữ liệu
 
-**Cập nhật 06/10/2026:** đã có [dự đoán từng phiên trước cuối tuần](docs/DU_DOAN_CUOI_TUAN.md) cho FP1, FP2, FP3, Q, SQ, Sprint và Race, không cần Q của chặng hiện tại. Mở trang **Toàn bộ cuối tuần**. Chặng ngày 04/10 tại Malaysia đã được cập nhật. Nội dung Q → Race bên dưới là thí nghiệm riêng của v1.
+Dự đoán FP1, FP2, FP3, Qualifying, Sprint Qualifying, Sprint và Race từ lịch sử **trước cuối tuần**. Chỉ hiện phiên có thật trong lịch. Có thí nghiệm Q → Race riêng để đối chứng, phân tích thống kê, KMeans/PCA, radar và MySQL.
 
-
-Đồ án kết hợp Machine Learning, cơ sở dữ liệu MySQL và web Python.
-
-**Trạng thái:** bản v1 đã chạy toàn bộ dữ liệu → MySQL → feature → huấn luyện → đánh giá → web. Có dữ liệu thật 2022–2025 và 15 chặng 2026 ở snapshot hiện tại; 13 chặng 2026 đủ điều kiện đánh giá. Không có dữ liệu hay metric giả.
-
-Mở [hướng dẫn chạy](docs/HUONG_DAN.md) để sử dụng, [báo cáo thực nghiệm](docs/BAO_CAO_THUC_NGHIEM.md) để đọc kết quả, và [tài liệu học/bảo vệ](docs/HOC_VA_BAO_VE.md) để hiểu code. [Đề cương](docs/DE_CUONG.md) giữ bản thiết kế ban đầu, bao gồm cả phần mở rộng chưa triển khai.
-
-Phạm vi v1: dự đoán thứ hạng đua chính sau phân hạng Q; dùng lịch sử trước Race. Web Streamlit/Plotly, MySQL, scikit-learn và CatBoost. Đây là backtest hồi cứu; nguồn Q có thể có sửa đổi sau sự kiện. Thời tiết Q được lưu để khám phá, chưa đưa vào model v1.
-
-Code được tổ chức theo OOP với service, repository và chiến lược mô hình dùng chung `fit()`/`predict()`. Đọc [kiến trúc và cách học OOP](docs/OOP.md) để xem trách nhiệm từng lớp, sơ đồ quan hệ và ví dụ sử dụng.
-
-## Mở demo trên máy hiện tại
+## Chạy demo trên máy hiện tại
 
 ```bash
 source .venv/bin/activate
@@ -21,42 +10,71 @@ python scripts/local_mysql.py start
 python -m streamlit run app.py --server.port 8501
 ```
 
-Mở http://127.0.0.1:8501. Nếu web đã chạy, chỉ cần mở địa chỉ này. Không phải tải dữ liệu hoặc train lại cho mỗi lần demo.
+Mở http://127.0.0.1:8501. Nếu cổng đã có chính web dự án thì mở lại, không chạy thêm; muốn phiên khác dùng `--server.port 8502`. Không cần train lại khi mở web.
 
-## Lấy bản demo từ GitHub
+Web gồm bốn mục: **Dự đoán · Phân tích · Mô hình · Dữ liệu**. Phần hướng dẫn học, OOP và bảo vệ chuyển vào docs, các chức năng dữ liệu và đối chiếu vẫn còn.
 
-Repo giữ mã nguồn, tài liệu và `deliverables/f1-lab-demo.zip`. Các thư mục dữ liệu, mô hình và bản sao lưu nằm **bên trong ZIP**, không được commit riêng lẻ. ZIP đã loại `.env`, `.local` và `.venv`.
+## Tự cập nhật lịch và kết quả
 
-Trên máy mới, tải ZIP từ repo và giải nén vào một thư mục trống. ZIP tạo thư mục `f1_prediction/` chứa cả source lẫn dữ liệu demo. Vào thư mục vừa giải nén, cài Python 3.12 và MySQL, rồi làm theo [hướng dẫn cài máy khác](docs/HUONG_DAN.md#2-cài-trên-máy-khác). Máy đã có project và MySQL như hiện tại chỉ cần dùng các lệnh ở mục trên.
+Khi web đang chạy và MySQL kết nối, một tiến trình nền kiểm tra mỗi phút; chỉ thực hiện đồng bộ tối đa một lần mỗi 15 phút. Năm lấy từ đồng hồ UTC. Lịch/Q/R toàn mùa được cập nhật; FP/Sprint chưa có ở hai chặng gần nhất được tải bổ sung. Nguồn chưa công bố kết quả thì không tạo nhãn giả. Chờ tối thiểu 6 giờ sau giờ bắt đầu phiên theo khoảng đệm dự án.
 
-## Kết quả ban đầu
+Sidebar ghi lần cập nhật và tình trạng nguồn; sau lượt đồng bộ mới, trang tự tải lại. Có thể bấm **Xem dữ liệu mới** để đọc lại MySQL. Mất mạng vẫn dùng dữ liệu đã lưu và thử lại chu kỳ sau. Máy tắt/web dừng thì không đồng bộ. Worker hiện hỗ trợ macOS/Linux (khóa file POSIX).
 
-Đã so sánh Linear Regression, Random Forest, HistGradientBoosting và CatBoost với hai baseline. Theo MAE validation 2024–2025, **Baseline Q** được chọn. Test 2026: MAE khoảng **3,427 bậc** trên **13 race / 286 mẫu**. Bốn model ML chưa vượt baseline theo metric này; đây là kết quả cần báo cáo trung thực, không phải lỗi phần mềm. Xem báo cáo cho toàn bộ metric và giới hạn.
+```bash
+python -m f1lab sync --force        # Đồng bộ ngay, không đợi 15 phút
+F1_AUTO_SYNC=0 python -m streamlit run app.py  # Demo offline từ dữ liệu sẵn có
+```
 
-## Các file làm gì?
+Lịch mới không làm thay đổi model đã chọn hoặc metric backtest cũ. Khi cần cập nhật nghiên cứu, chủ động chạy weekend-train; tránh chọn thuật toán dựa trên test đã xem.
 
-- `docs/DE_CUONG.md`: bài toán, dữ liệu, MySQL, mô hình, đánh giá, web, lộ trình, bảo vệ đồ án.
-- `docs/BAI_01.md`: giải thích và hướng dẫn thu thập một chặng trước khi mở rộng.
-- `docs/HUONG_DAN.md`: cài đặt, chạy, cập nhật, backup/restore, kiểm thử và lỗi thường gặp.
-- `docs/HOC_VA_BAO_VE.md`: đọc code theo luồng, data dictionary, cách giải thích mô hình/metric và hỏi đáp.
-- `docs/BAO_CAO_THUC_NGHIEM.md`: báo cáo sinh từ số liệu chạy thật.
-- `docs/ERD.md`, `sql/schema.sql`, `sql/demo_queries.sql`: sơ đồ và nội dung môn CSDL.
-- `f1lab/ingest.py`: tải dữ liệu qua FastF1, làm sạch cấu trúc và import transaction.
-- `f1lab/features.py`: tạo thống kê quá khứ và lưu snapshot đầu vào.
-- `f1lab/models.py`: `RaceModel`, các chiến lược baseline/hồi quy và `ModelFactory`.
-- `f1lab/ml.py`: `ExperimentTrainer`, `PredictionService`, `TemporalSplitter` và `RaceEvaluator`.
-- `f1lab/repositories.py`: các lớp truy vấn kết quả, lưu snapshot/run và đọc artifact.
-- `f1lab/config.py`: cấu hình đường dẫn có thể truyền vào khi kiểm thử.
-- `f1lab/db.py`: các bảng và khóa SQLAlchemy/MySQL.
-- `f1lab/delivery.py`: báo cáo, schema, backup/restore và đóng gói demo.
-- `app.py`: điểm khởi chạy Streamlit; `f1lab/web.py` chứa lớp `DashboardApp` và năm trang.
-- `scripts/collect_session.py`: tải một phiên bằng FastF1, lưu CSV và manifest kiểm tra dữ liệu.
-- `scripts/local_mysql.py`: MySQL riêng qua socket trên máy Unix có mysqld.
-- `requirements.lock.txt`: phiên bản môi trường đã chạy; Python 3.12.
-- `tests/`: kiểm tra leakage, rank, metric, import và web. Chạy `python -m pytest -q --live-db` để kiểm tra cả MySQL.
+## Phân tích và đầu ra nộp bài
 
-## Những gì chưa nằm trong v1
+```bash
+python -m f1lab analyze --season 2025
+python radarChartPlot.py --p1 norris --p2 max_verstappen --season 2025
+python radarChartPlot.py --p1 norris --p2 max_verstappen --season 2025 --Attribute quali_mean race_mean points_mean
+```
 
-Chưa có classifier/xác suất podium, forecast thời tiết lưu ở cutoff, SHAP, tuning lớn, live prediction giữa Race hay website công khai. F1-score dành cho bài toán phân loại bổ sung; v1 tập trung thứ hạng và các metric tương ứng.
+Đầu ra ở `data/processed/analysis/`: results.csv, results2.csv, data_dictionary.csv, quality_report.json, extremes.csv, driver_season.csv, kết quả KMeans/PCA và các PNG. Radar chuẩn hóa theo toàn bộ tay đua cùng mùa; phía ngoài là tốt hơn, riêng n_races là độ phủ.
 
-Không dùng kết quả đua chính của chặng cần dự đoán làm đặc trưng đầu vào. `Race.Position` là nhãn; `Qualifying.Position` có thể là đặc trưng nếu đã có trước thời điểm dự đoán.
+Kết quả snapshot ngày 06/10/2026: nguồn Q/R có 16 chặng 2026; thí nghiệm Q→Race có 14 chặng test đủ điều kiện. Baseline Q thắng validation, MAE test khoảng 3,435 bậc. Mô hình trước cuối tuần được chọn riêng từng phiên; không ép Random Forest hay CatBoost phải thắng baseline. KMeans mùa 2025 có 21 tay đua, chọn k=3; PCA2D giải thích khoảng 95,4% phương sai. Các con số này thuộc lần chạy đã lưu, không phải cam kết dự đoán tương lai.
+
+## Máy mới và bản bàn giao
+
+Giải nén `deliverables/f1-lab-demo.zip` vào thư mục trống. ZIP gồm source, tài liệu, báo cáo Word, dữ liệu phân tích, model và backup MySQL; không chứa .env/.local/.venv. GitHub chưa được đẩy tiếp theo yêu cầu tạm dừng trước đó.
+
+Cài Python 3.12 và MySQL; trên macOS/Linux có mysqld:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.lock.txt
+python scripts/local_mysql.py start
+python -m f1lab init-db
+python -m f1lab restore --input deliverables/database.json.gz
+python -m streamlit run app.py
+```
+
+Chỉ restore vào CSDL trống. Có thể dùng compose.yaml/MySQL riêng rồi cấu hình DATABASE_URL trong .env; xem [hướng dẫn đầy đủ](docs/HUONG_DAN.md). Không có backup thì thu thập nguồn và train theo tài liệu, không restore đè DB đang có.
+
+## Các lệnh kiểm tra và đóng gói
+
+```bash
+python -m pytest -q --live-db
+python -m scripts.verify_database
+python -m f1lab report
+python -m f1lab backup
+python -m f1lab bundle
+```
+
+verify_database dùng root của MySQL riêng để tạo schema thử có tên UUID, kiểm tra rồi xóa schema thử. Không xóa DB dự án. Bằng chứng ở deliverables/database-evidence.json.
+
+## Đọc để học và thuyết trình
+
+- [Chia module và đường đọc code](docs/SYSTEM_MODULES.md).
+- [Đối chiếu yêu cầu đã thực hiện](docs/DOI_CHIEU_DE_BAI.md).
+- [Đề bài F1](docs/DE_BAI_F1_PYTHON_CSDL.md), [OOP](docs/OOP.md), [ERD](docs/ERD.md).
+- [Dự đoán trước cuối tuần](docs/DU_DOAN_CUOI_TUAN.md), [báo cáo đối chứng Q→Race](docs/BAO_CAO_THUC_NGHIEM.md).
+- [Học và bảo vệ](docs/HOC_VA_BAO_VE.md), [hướng dẫn vận hành](docs/HUONG_DAN.md).
+
+Giới hạn: danh sách tham gia hồi cứu; nguồn có thể sửa sau sự kiện; FP/Sprint ít mẫu; chưa có forecast thời tiết lưu tại cutoff, xác suất podium hay dự đoán trong lúc đua. Thời tiết Q được lưu/visual riêng. F1-score thuộc bài toán phân loại, không phải chỉ số nên gắn tùy ý vào hồi quy thứ hạng.

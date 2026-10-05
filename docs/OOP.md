@@ -116,3 +116,8 @@ python -m pytest -q --live-db
 ## Mở rộng dự đoán từng phiên
 
 Các lớp WeekendCollector, WeekendRepository, WeekendFeatureBuilder, WeekendTrainer và WeekendPredictionService nằm trong f1lab/weekend.py. WeekendFormModel và WeekendRegressionModel kế thừa RaceModel, nên có cùng hợp đồng fit/predict. Bộ đặc trưng riêng không chứa Q hiện tại. Xem [hướng dẫn từng phiên](DU_DOAN_CUOI_TUAN.md).
+
+
+## Cấu trúc module hiện hành
+
+Đọc SYSTEM_MODULES.md để xem sáu nhóm chức năng. weekend.py là lớp tương thích import cho artifact cũ; các lớp hiện đặt ở weekend_engine/repository.py, collection.py, features.py, training.py và prediction.py. Phân tích mô tả tách sang analysis/, đồng bộ nguồn ở sync.py. Giao diện có bốn mục, tài liệu học đã chuyển khỏi menu chính.
