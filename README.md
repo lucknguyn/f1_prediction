@@ -8,6 +8,8 @@ Mở [hướng dẫn chạy](docs/HUONG_DAN.md) để sử dụng, [báo cáo th
 
 Phạm vi v1: dự đoán thứ hạng đua chính sau phân hạng Q; dùng lịch sử trước Race. Web Streamlit/Plotly, MySQL, scikit-learn và CatBoost. Đây là backtest hồi cứu; nguồn Q có thể có sửa đổi sau sự kiện. Thời tiết Q được lưu để khám phá, chưa đưa vào model v1.
 
+Code được tổ chức theo OOP với service, repository và chiến lược mô hình dùng chung `fit()`/`predict()`. Đọc [kiến trúc và cách học OOP](docs/OOP.md) để xem trách nhiệm từng lớp, sơ đồ quan hệ và ví dụ sử dụng.
+
 ## Mở demo trên máy hiện tại
 
 ```bash
@@ -38,10 +40,13 @@ Trên máy mới, tải ZIP từ repo và giải nén vào một thư mục tr�
 - `docs/ERD.md`, `sql/schema.sql`, `sql/demo_queries.sql`: sơ đồ và nội dung môn CSDL.
 - `f1lab/ingest.py`: tải dữ liệu qua FastF1, làm sạch cấu trúc và import transaction.
 - `f1lab/features.py`: tạo thống kê quá khứ và lưu snapshot đầu vào.
-- `f1lab/ml.py`: pipeline, chia theo thời gian, đánh giá và lưu dự đoán.
+- `f1lab/models.py`: `RaceModel`, các chiến lược baseline/hồi quy và `ModelFactory`.
+- `f1lab/ml.py`: `ExperimentTrainer`, `PredictionService`, `TemporalSplitter` và `RaceEvaluator`.
+- `f1lab/repositories.py`: các lớp truy vấn kết quả, lưu snapshot/run và đọc artifact.
+- `f1lab/config.py`: cấu hình đường dẫn có thể truyền vào khi kiểm thử.
 - `f1lab/db.py`: các bảng và khóa SQLAlchemy/MySQL.
 - `f1lab/delivery.py`: báo cáo, schema, backup/restore và đóng gói demo.
-- `app.py`: giao diện năm trang.
+- `app.py`: điểm khởi chạy Streamlit; `f1lab/web.py` chứa lớp `DashboardApp` và năm trang.
 - `scripts/collect_session.py`: tải một phiên bằng FastF1, lưu CSV và manifest kiểm tra dữ liệu.
 - `scripts/local_mysql.py`: MySQL riêng qua socket trên máy Unix có mysqld.
 - `requirements.lock.txt`: phiên bản môi trường đã chạy; Python 3.12.

@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, timezone
-from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import (JSON, CheckConstraint, Column, DateTime, Float, ForeignKey,
                         ForeignKeyConstraint, Integer, String, UniqueConstraint,
                         create_engine, text)
 from sqlalchemy.orm import DeclarativeBase
+from .config import AppConfig
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = AppConfig().root
 
 
 def utcnow():
@@ -149,12 +149,34 @@ class EvaluationMetric(Base):
     value = Column(Float)
 
 
+class Database:
+    """Sở hữu engine; tạo kết nối khi cần và giải phóng pool bằng close()."""
+    def __init__(self, url=None, config=None):
+        self.config = config if config is not None else AppConfig()
+        self.url = url
+        self._engine = None
+
+    @property
+    def engine(self):
+        if self._engine is None:
+            load_dotenv(self.config.root / ".env")
+            url = self.url or os.getenv("DATABASE_URL")
+            if not url:
+                raise RuntimeError("Chưa cấu hình MySQL. Chạy: .venv/bin/python scripts/local_mysql.py start")
+            self._engine = create_engine(url, pool_pre_ping=True)
+        return self._engine
+
+    def initialize(self):
+        initialize(self.engine)
+
+    def close(self):
+        if self._engine is not None:
+            self._engine.dispose()
+
+
 def engine():
-    load_dotenv(ROOT / ".env")
-    url = os.getenv("DATABASE_URL")
-    if not url:
-        raise RuntimeError("Chưa cấu hình MySQL. Chạy: .venv/bin/python scripts/local_mysql.py start")
-    return create_engine(url, pool_pre_ping=True)
+    """Compatibility adapter; ứng dụng mới sở hữu đối tượng Database."""
+    return Database().engine
 
 
 VIEW_SQL = """CREATE OR REPLACE VIEW prediction_comparison AS

@@ -1,4 +1,14 @@
-# Bằng chứng kiểm tra bản v1
+# Bằng chứng kiểm tra F1 Lab
+
+## Bản OOP ngày 5 tháng 10 năm 2026
+
+Sau khi tách service/repository/strategy, bộ kiểm thử được mở rộng thêm các hợp đồng OOP. Kiểm tra gồm CLI, năm trang web với MySQL thật, tạo/lưu dự đoán, thay nguồn bằng dependency trong bộ nhớ, huấn luyện trong thư mục tạm, khóa lựa chọn trước test và so sánh điểm/thứ hạng của tất cả artifact cũ. Các test train mới dùng fixture tổng hợp riêng, không ghi vào dữ liệu/mô hình demo.
+
+Thêm kiểm tra `SessionCollector` xuất manifest cho dữ liệu thiếu và `LocalMySQLManager` chỉ đọc PID trong thư mục riêng.
+
+**Kết quả: `35 passed in 16.75s`** với lệnh `.venv/bin/python -m pytest -q --live-db`. Không có kiểm thử bị bỏ qua hay cảnh báo trong lần chạy này. Schema và artifact mô hình trước refactor vẫn tương thích.
+
+## Bằng chứng bản v1 trước refactor
 
 Lệnh kiểm tra cuối gồm MySQL thật:
 

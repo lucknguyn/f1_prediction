@@ -68,7 +68,7 @@ View `prediction_comparison` JOIN các bảng để trình bày tên race/tay đ
 
 **Baseline Q:** lấy thứ tự phân hạng làm dự đoán. **Baseline phong độ:** lấy hạng trung bình 5 race trước, thiếu lịch sử thì dùng Q. Hai baseline giúp biết ML thêm giá trị hay chỉ làm phức tạp bài toán.
 
-Mở `f1lab/ml.py`, đọc `pipeline`, `time_split`, `run_fold`, rồi phần tạo leaderboard. Cấu hình v1 cố định, seed 42; không có grid search. Không nói “đã tối ưu tất cả tham số”.
+Mở `f1lab/models.py`, đọc `RaceModel`, `ModelFactory` và `_regression_pipeline`; sau đó mở `f1lab/ml.py`, đọc `TemporalSplitter.split`, `ExperimentTrainer._run_fold` và `ExperimentTrainer.train` để xem leaderboard. Cấu hình v1 cố định, seed 42; không có grid search. Không nói “đã tối ưu tất cả tham số”. Xem `docs/OOP.md` để hiểu đóng gói, kế thừa và đa hình trong code thật.
 
 ## Bài 6 — Tự tính metric
 

@@ -81,7 +81,7 @@ Trong cấu hình v1, bốn model ML chưa vượt baseline Q theo metric chọn
 
 ## 9. Tái lập và bằng chứng
 
-SHA-256 dataset: `b283cf6f42e18d641429056075913ed81c3d5ba5603d3662cfac7c03a13f821e`. Phiên bản thư viện: requirements.lock.txt. Cấu hình: f1lab/ml.py. Metric đầy đủ: artifacts/20260928T183436-50f3a7/metrics.csv. Prediction từng tay đua: predictions.csv. Tập chia và model lưu theo run_id trong MySQL.
+SHA-256 dataset: `b283cf6f42e18d641429056075913ed81c3d5ba5603d3662cfac7c03a13f821e`. Phiên bản thư viện: requirements.lock.txt. Cấu hình mô hình: f1lab/models.py. Giao thức thí nghiệm: f1lab/ml.py. Metric đầy đủ: artifacts/20260928T183436-50f3a7/metrics.csv. Prediction từng tay đua: predictions.csv. Tập chia và model lưu theo run_id trong MySQL.
 
 Đối chiếu lưu nguồn và cutoff ở ingestion_runs/feature_snapshots; prediction_comparison là view JOIN các bảng. Xem HUONG_DAN.md để chạy lại, backup/restore và kiểm thử. Báo cáo kiểm thử riêng ghi kết quả của lần chạy cuối.
 
