@@ -17,6 +17,10 @@ class F1LabCLI:
         sub = parser.add_subparsers(dest="command", required=True)
         for name in ("init-db", "doctor", "report", "bundle", "features"):
             sub.add_parser(name)
+        analysis = sub.add_parser("analyze")
+        analysis.add_argument("--season", type=int, default=2025)
+        sync = sub.add_parser("sync")
+        sync.add_argument("--force", action="store_true")
         backup = sub.add_parser("backup")
         backup.add_argument("--output", type=Path, default=self.config.root / "deliverables/database.json.gz")
         restore = sub.add_parser("restore")
@@ -31,6 +35,15 @@ class F1LabCLI:
         train.add_argument("--test-year", type=int, default=2026)
         predict = sub.add_parser("predict")
         predict.add_argument("--race", type=int, required=True, help="VD 202601")
+        weekend_data = sub.add_parser("weekend-data")
+        weekend_data.add_argument("--years", nargs="+", type=int, default=[2024, 2025, 2026])
+        weekend_data.add_argument("--rounds", nargs="+", type=int)
+        weekend_data.add_argument("--kinds", nargs="+", choices=["FP1", "FP2", "FP3", "Q", "SQ", "S", "R"])
+        weekend_data.add_argument("--refresh", action="store_true")
+        weekend_train = sub.add_parser("weekend-train")
+        weekend_train.add_argument("--test-year", type=int, default=2026)
+        weekend_predict = sub.add_parser("weekend-predict")
+        weekend_predict.add_argument("--session", required=True, help="VD 202616-R hoặc 202617-SQ")
         return parser
 
     def run(self, argv=None):
@@ -69,6 +82,25 @@ class F1LabCLI:
         elif args.command == "weather":
             from .ingest import IngestionService
             print(IngestionService(db, self.config).collect_weather(args.year, args.round))
+        elif args.command == "analyze":
+            from .analysis import AnalysisService
+            print(json.dumps(AnalysisService(db, self.config).export(args.season), indent=2))
+        elif args.command == "sync":
+            import fastf1
+            from .sync import SyncService
+            # CLI tiến trình riêng: không dùng context toàn cục này trong web thread.
+            with fastf1.Cache.disabled():
+                result = SyncService(db, self.config).run(force=args.force)
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+        elif args.command == "weekend-data":
+            from .weekend import WeekendCollector
+            WeekendCollector(db, self.config).collect(args.years, args.kinds, args.rounds, args.refresh)
+        elif args.command == "weekend-train":
+            from .weekend import WeekendTrainer
+            print(json.dumps(WeekendTrainer(db, self.config).train(args.test_year), indent=2, ensure_ascii=False))
+        elif args.command == "weekend-predict":
+            from .weekend import WeekendPredictionService
+            print(WeekendPredictionService(db, self.config).predict(args.session).to_string(index=False))
         elif args.command == "features":
             from .features import FeatureService
             print(FeatureService(db, self.config).build_and_save()[1])

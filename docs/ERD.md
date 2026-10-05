@@ -124,3 +124,10 @@ Dataset CSV của thí nghiệm là bản xuất để chạy/review; nguồn qu
 ## Nội dung có thể demo
 
 Chạy các truy vấn đọc ở `sql/demo_queries.sql`: JOIN nhiều bảng, GROUP BY đội, view so sánh, thống kê thiếu thời gian Q, window function theo tay đua, và EXPLAIN. Import thực hiện trong transaction; kiểm thử xác minh rollback khi một phiên có dữ liệu trùng. Không có trigger/stored procedure trong v1 vì chưa có nghiệp vụ bắt buộc cần chúng.
+
+
+## Bảng dự đoán trước cuối tuần
+
+Bổ sung weekend_sessions với FK race_id, loại phiên, start_utc và cutoff_utc trước phiên đầu cuối tuần. weekend_results có PK (session_id, driver_id), FK đến weekend_sessions/drivers và FK team_id đến teams; đội được lưu theo phiên để hỗ trợ người dự bị FP.
+
+weekend_runs có FK session_id, cutoff, model, artifact và metadata nguồn danh sách. weekend_predictions có PK (run_id, driver_id), FK đến weekend_runs/drivers, score, rank, actual_rank và JSON snapshot các feature. Giá trị nhãn phiên tương lai để NULL; CHECK yêu cầu rank dương. Các bảng này phục vụ giao thức riêng, không sửa nghĩa của snapshot Q → Race v1.

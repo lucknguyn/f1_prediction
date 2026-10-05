@@ -47,8 +47,13 @@ class BackupService:
     def restore(self, source):
         with gzip.open(source, "rt", encoding="utf-8") as handle:
             payload = json.load(handle)
-        if payload.get("format") != "f1lab-db-v1" or set(payload["tables"]) != set(Base.metadata.tables):
+        new_tables = {"weekend_sessions", "weekend_results", "weekend_runs", "weekend_predictions"}
+        names = set(payload.get("tables", {}))
+        expected = set(Base.metadata.tables)
+        if payload.get("format") != "f1lab-db-v1" or names not in (expected, expected - new_tables):
             raise ValueError("Backup không đúng schema/format của dự án")
+        for name in expected - names:
+            payload["tables"][name] = []
         with self.db.begin() as conn:
             for table in Base.metadata.sorted_tables:
                 if conn.execute(select(func.count()).select_from(table)).scalar():
@@ -77,7 +82,8 @@ class ReportService:
             for index in sorted(table.indexes, key=lambda x: x.name):
                 statements.append(str(CreateIndex(index).compile(dialect=mysql.dialect())) + ";")
         statements.append(VIEW_SQL + ";")
-        (folder / "schema.sql").write_text("\n\n".join(statements) + "\n", encoding="utf-8")
+        generated = "\n\n".join(statements)
+        (folder / "schema.sql").write_text("\n".join(line.rstrip() for line in generated.splitlines()) + "\n", encoding="utf-8")
 
     def write_report(self):
         summary = json.loads((self.config.root / "artifacts" / "latest.json").read_text())
@@ -161,13 +167,21 @@ class BundleService:
             for path in (self.config.root / dirname).rglob("*"):
                 if path.is_file() and "__pycache__" not in path.parts and path.suffix in {".py", ".md", ".sql", ".toml", ".png"} and path.name != "secrets.toml":
                     paths.append(path)
-        for filename in ["README.md", "app.py", "requirements.txt", "requirements.lock.txt", "requirements-ingest.txt", "compose.yaml", ".env.example", ".gitignore"]:
+        for filename in ["README.md", "app.py", "radarChartPlot.py", "requirements.txt", "requirements.lock.txt", "requirements-ingest.txt", "compose.yaml", ".env.example", ".gitignore"]:
             paths.append(self.config.root / filename)
         paths += [p for p in (self.config.root / "artifacts" / summary["experiment"]).rglob("*") if p.is_file()]
         paths.append(self.config.root / "artifacts" / "latest.json")
+        weekend_latest = self.config.artifacts_dir / "weekend/latest.json"
+        if weekend_latest.exists():
+            weekend = json.loads(weekend_latest.read_text())
+            paths.append(weekend_latest)
+            paths += [p for p in (weekend_latest.parent / weekend["experiment"]).rglob("*") if p.is_file()]
         paths += list((self.config.root / "data" / "raw").glob("*/latest.json"))
         paths += list((self.config.root / "data" / "raw").glob("*/round_*/Q/weather.csv"))
-        paths += [p for p in (self.config.root / "data" / "processed").glob("*") if p.is_file()]
+        paths += [p for p in (self.config.root / "data" / "processed").glob("*") if p.is_file() and p.suffix not in (".lock", ".tmp") and p.name != "sync_status.json"]
+        paths += [p for p in (self.config.processed_dir / "analysis").rglob("*") if p.is_file()]
+        paths += list((self.config.root / "deliverables").glob("*.docx"))
+        paths += list((self.config.root / "deliverables").glob("*-evidence.json"))
         backup = self.config.root / "deliverables" / "database.json.gz"
         if not backup.exists():
             raise ValueError("Chạy backup trước khi đóng gói")

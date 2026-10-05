@@ -1,5 +1,17 @@
 # Bằng chứng kiểm tra F1 Lab
 
+## Dự đoán trước cuối tuần ngày 06 tháng 10 năm 2026
+
+- Bộ kiểm thử đầy đủ với MySQL thật: **45 passed trong 21,35 giây**.
+- Thử tạo và lưu dự đoán cho FP1/FP2/FP3/Q/R tại chặng 202616 và SQ/S tương lai tại 202617: mỗi phiên có 22 hạng khác nhau; phiên tương lai không có nhãn giả.
+- Kiểm tra MySQL không có weekend_results với driver_id hoặc team_id bằng chuỗi nan.
+- Phục hồi backup trước khi có bảng weekend vào CSDL SQLite kiểm thử thành công: 4.331 kết quả nguồn, bốn bảng mới trống.
+- Kiểm thử thay đổi dữ liệu hiện tại/tương lai không làm thay đổi feature trước cuối tuần; vòng FP bị xóa không làm nhãn; roster SQ và người dự bị được xử lý riêng.
+- Smoke test trang mới, đường dẫn trực tiếp, đổi chặng và không phát sinh FP2/FP3 tại Singapore Sprint.
+
+Độ phủ FP/Sprint còn ít; kiểm thử phần mềm đạt không đồng nghĩa dự đoán chính xác. Xem DU_DOAN_CUOI_TUAN.md để biết phạm vi dữ liệu và giới hạn hồi cứu.
+
+
 ## Bản OOP ngày 5 tháng 10 năm 2026
 
 Sau khi tách service/repository/strategy, bộ kiểm thử được mở rộng thêm các hợp đồng OOP. Kiểm tra gồm CLI, năm trang web với MySQL thật, tạo/lưu dự đoán, thay nguồn bằng dependency trong bộ nhớ, huấn luyện trong thư mục tạm, khóa lựa chọn trước test và so sánh điểm/thứ hạng của tất cả artifact cũ. Các test train mới dùng fixture tổng hợp riêng, không ghi vào dữ liệu/mô hình demo.

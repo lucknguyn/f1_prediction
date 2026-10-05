@@ -111,3 +111,8 @@ python -m f1lab predict --race 202602
 python -m streamlit run app.py --server.port 8501
 python -m pytest -q --live-db
 ```
+
+
+## Mở rộng dự đoán từng phiên
+
+Các lớp WeekendCollector, WeekendRepository, WeekendFeatureBuilder, WeekendTrainer và WeekendPredictionService nằm trong f1lab/weekend.py. WeekendFormModel và WeekendRegressionModel kế thừa RaceModel, nên có cùng hợp đồng fit/predict. Bộ đặc trưng riêng không chứa Q hiện tại. Xem [hướng dẫn từng phiên](DU_DOAN_CUOI_TUAN.md).

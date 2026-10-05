@@ -1,6 +1,6 @@
 # Báo cáo thực nghiệm — F1 Lab 2026
 
-Thí nghiệm: `20260928T183436-50f3a7`. Hoàn thành UTC: 2026-09-28T18:34:43.242434. Báo cáo được sinh từ các CSV thực nghiệm, không điền điểm giả.
+Thí nghiệm: `20261005T173624-3a10a1`. Hoàn thành UTC: 2026-10-05T17:36:30.625153. Báo cáo được sinh từ các CSV thực nghiệm, không điền điểm giả.
 
 ## 1. Bài toán và phạm vi
 
@@ -8,13 +8,13 @@ Dự đoán thứ tự các tay đua trước Race, sau Q. Một mẫu là một
 
 ## 2. Dữ liệu và coverage
 
-Có 2,063 mẫu feature của 102 chặng Q hợp lệ. Coverage kiểm tra 107 chặng đã có Q; 98 chặng đủ nhãn để đánh giá toàn bộ danh sách. Lịch tương lai chưa có Q không nằm trong dataset feature.
+Có 2,085 mẫu feature của 103 chặng Q hợp lệ. Coverage kiểm tra 108 chặng đã có Q; 99 chặng đủ nhãn để đánh giá toàn bộ danh sách. Lịch tương lai chưa có Q không nằm trong dataset feature.
 
 - 2022: 22 chặng có Q; 22 chặng đủ điều kiện; 0 chặng chưa đủ.
 - 2023: 22 chặng có Q; 21 chặng đủ điều kiện; 1 chặng chưa đủ.
 - 2024: 24 chặng có Q; 21 chặng đủ điều kiện; 3 chặng chưa đủ.
 - 2025: 24 chặng có Q; 21 chặng đủ điều kiện; 3 chặng chưa đủ.
-- 2026: 15 chặng có Q; 13 chặng đủ điều kiện; 2 chặng chưa đủ.
+- 2026: 16 chặng có Q; 14 chặng đủ điều kiện; 2 chặng chưa đủ.
 
 Các chặng bị loại khỏi đánh giá đầy đủ:
 
@@ -57,14 +57,14 @@ Lựa chọn triển khai: **Baseline Q**. Baseline cũng là ứng viên hợp 
 
 ## 6. Test 2026
 
-- **Baseline Q**: MAE rank 3.427; RMSE rank 4.902; Spearman 0.675; đúng người thắng 69.2%; podium overlap 56.4%; R² raw 0.351; 13 race / 286 mẫu.
-- **Baseline phong độ**: MAE rank 4.399; RMSE rank 5.799; Spearman 0.563; đúng người thắng 7.7%; podium overlap 30.8%; R² raw 0.286; 13 race / 286 mẫu.
-- **Linear Regression**: MAE rank 3.545; RMSE rank 5.059; Spearman 0.655; đúng người thắng 61.5%; podium overlap 61.5%; R² raw 0.420; 13 race / 286 mẫu.
-- **Random Forest**: MAE rank 3.580; RMSE rank 4.967; Spearman 0.666; đúng người thắng 46.2%; podium overlap 53.8%; R² raw 0.417; 13 race / 286 mẫu.
-- **HistGradientBoosting**: MAE rank 3.811; RMSE rank 5.129; Spearman 0.645; đúng người thắng 30.8%; podium overlap 56.4%; R² raw 0.387; 13 race / 286 mẫu.
-- **CatBoost**: MAE rank 3.566; RMSE rank 5.024; Spearman 0.659; đúng người thắng 53.8%; podium overlap 53.8%; R² raw 0.402; 13 race / 286 mẫu.
+- **Baseline Q**: MAE rank 3.435; RMSE rank 4.875; Spearman 0.681; đúng người thắng 71.4%; podium overlap 57.1%; R² raw 0.361; 14 race / 308 mẫu.
+- **Baseline phong độ**: MAE rank 4.351; RMSE rank 5.779; Spearman 0.568; đúng người thắng 7.1%; podium overlap 31.0%; R² raw 0.290; 14 race / 308 mẫu.
+- **Linear Regression**: MAE rank 3.539; RMSE rank 5.036; Spearman 0.660; đúng người thắng 64.3%; podium overlap 61.9%; R² raw 0.428; 14 race / 308 mẫu.
+- **Random Forest**: MAE rank 3.552; RMSE rank 4.924; Spearman 0.673; đúng người thắng 50.0%; podium overlap 54.8%; R² raw 0.430; 14 race / 308 mẫu.
+- **HistGradientBoosting**: MAE rank 3.792; RMSE rank 5.093; Spearman 0.651; đúng người thắng 35.7%; podium overlap 57.1%; R² raw 0.403; 14 race / 308 mẫu.
+- **CatBoost**: MAE rank 3.545; RMSE rank 4.985; Spearman 0.666; đúng người thắng 57.1%; podium overlap 54.8%; R² raw 0.415; 14 race / 308 mẫu.
 
-Với Baseline Q, MAE 3.427 nghĩa là lệch trung bình khoảng 3.43 bậc. Winner hit 69.2% chỉ đo người thắng, không là độ chính xác toàn bảng. Podium overlap không yêu cầu đúng thứ tự podium. R² raw dùng điểm hồi quy, khác chất lượng thứ hạng sau sắp xếp.
+Với Baseline Q, MAE 3.435 nghĩa là lệch trung bình khoảng 3.44 bậc. Winner hit 71.4% chỉ đo người thắng, không là độ chính xác toàn bảng. Podium overlap không yêu cầu đúng thứ tự podium. R² raw dùng điểm hồi quy, khác chất lượng thứ hạng sau sắp xếp.
 
 ## 7. Hai chặng để phân tích khi demo
 
@@ -81,7 +81,7 @@ Trong cấu hình v1, bốn model ML chưa vượt baseline Q theo metric chọn
 
 ## 9. Tái lập và bằng chứng
 
-SHA-256 dataset: `b283cf6f42e18d641429056075913ed81c3d5ba5603d3662cfac7c03a13f821e`. Phiên bản thư viện: requirements.lock.txt. Cấu hình mô hình: f1lab/models.py. Giao thức thí nghiệm: f1lab/ml.py. Metric đầy đủ: artifacts/20260928T183436-50f3a7/metrics.csv. Prediction từng tay đua: predictions.csv. Tập chia và model lưu theo run_id trong MySQL.
+SHA-256 dataset: `ead900f084627c8aa3c587ceeee909031f165b4fc3928672f8da9be882a5386b`. Phiên bản thư viện: requirements.lock.txt. Cấu hình mô hình: f1lab/models.py. Giao thức thí nghiệm: f1lab/ml.py. Metric đầy đủ: artifacts/20261005T173624-3a10a1/metrics.csv. Prediction từng tay đua: predictions.csv. Tập chia và model lưu theo run_id trong MySQL.
 
 Đối chiếu lưu nguồn và cutoff ở ingestion_runs/feature_snapshots; prediction_comparison là view JOIN các bảng. Xem HUONG_DAN.md để chạy lại, backup/restore và kiểm thử. Báo cáo kiểm thử riêng ghi kết quả của lần chạy cuối.
 

@@ -194,3 +194,51 @@ def initialize(db):
     Base.metadata.create_all(db)
     with db.begin() as conn:
         conn.execute(text(VIEW_SQL))
+
+
+class WeekendSession(Base):
+    """Lịch thực tế từng phiên; tách khỏi schema Q/R v1 để giữ artifact cũ."""
+    __tablename__ = "weekend_sessions"
+    id = Column(String(24), primary_key=True)
+    race_id = Column(Integer, ForeignKey("races.id"), nullable=False, index=True)
+    kind = Column(String(4), nullable=False)
+    start_utc = Column(DateTime, nullable=False)
+    cutoff_utc = Column(DateTime, nullable=False)  # trước phiên đầu tiên cuối tuần
+    history_after_utc = Column(DateTime, nullable=False)  # start + 6h bảo thủ
+    collected_at = Column(DateTime, nullable=False, default=utcnow)
+    status = Column(String(32), nullable=False, default="scheduled")
+    source = Column(String(120), nullable=False)
+    details = Column(JSON, nullable=False, default=dict)
+    __table_args__ = (UniqueConstraint("race_id", "kind"),)
+
+
+class WeekendResult(Base):
+    __tablename__ = "weekend_results"
+    session_id = Column(String(24), ForeignKey("weekend_sessions.id"), primary_key=True)
+    driver_id = Column(String(80), ForeignKey("drivers.id"), primary_key=True)
+    team_id = Column(String(80), ForeignKey("teams.id"), nullable=False)
+    position = Column(Integer)
+    best_seconds = Column(Float)
+    __table_args__ = (CheckConstraint("position IS NULL OR position > 0"),)
+
+
+class WeekendRun(Base):
+    __tablename__ = "weekend_runs"
+    id = Column(String(36), primary_key=True)
+    session_id = Column(String(24), ForeignKey("weekend_sessions.id"), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=utcnow)
+    cutoff_utc = Column(DateTime, nullable=False)
+    model = Column(String(80), nullable=False)
+    artifact = Column(String(512), nullable=False)
+    details = Column(JSON, nullable=False)
+
+
+class WeekendPrediction(Base):
+    __tablename__ = "weekend_predictions"
+    run_id = Column(String(36), ForeignKey("weekend_runs.id"), primary_key=True)
+    driver_id = Column(String(80), ForeignKey("drivers.id"), primary_key=True)
+    score = Column(Float, nullable=False)
+    rank = Column(Integer, nullable=False)
+    actual_rank = Column(Integer)
+    features = Column(JSON, nullable=False)
+    __table_args__ = (CheckConstraint("`rank` > 0"),)

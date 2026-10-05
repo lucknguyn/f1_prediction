@@ -3,55 +3,55 @@
 SET NAMES utf8mb4;
 
 CREATE TABLE circuits (
-	id VARCHAR(80) NOT NULL, 
-	name VARCHAR(160) NOT NULL, 
-	country VARCHAR(80), 
+	id VARCHAR(80) NOT NULL,
+	name VARCHAR(160) NOT NULL,
+	country VARCHAR(80),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE drivers (
-	id VARCHAR(80) NOT NULL, 
-	name VARCHAR(160) NOT NULL, 
-	code VARCHAR(10), 
+	id VARCHAR(80) NOT NULL,
+	name VARCHAR(160) NOT NULL,
+	code VARCHAR(10),
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE ingestion_runs (
-	id VARCHAR(36) NOT NULL, 
-	created_at DATETIME NOT NULL, 
-	source VARCHAR(120) NOT NULL, 
-	status VARCHAR(24) NOT NULL, 
-	details JSON NOT NULL, 
+	id VARCHAR(36) NOT NULL,
+	created_at DATETIME NOT NULL,
+	source VARCHAR(120) NOT NULL,
+	status VARCHAR(24) NOT NULL,
+	details JSON NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE model_runs (
-	id VARCHAR(36) NOT NULL, 
-	created_at DATETIME NOT NULL, 
-	name VARCHAR(80) NOT NULL, 
-	train_through DATETIME NOT NULL, 
-	split VARCHAR(32) NOT NULL, 
-	artifact VARCHAR(512), 
-	details JSON NOT NULL, 
+	id VARCHAR(36) NOT NULL,
+	created_at DATETIME NOT NULL,
+	name VARCHAR(80) NOT NULL,
+	train_through DATETIME NOT NULL,
+	split VARCHAR(32) NOT NULL,
+	artifact VARCHAR(512),
+	details JSON NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE teams (
-	id VARCHAR(80) NOT NULL, 
-	name VARCHAR(160) NOT NULL, 
+	id VARCHAR(80) NOT NULL,
+	name VARCHAR(160) NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE races (
-	id INTEGER NOT NULL AUTO_INCREMENT, 
-	season INTEGER NOT NULL, 
-	round INTEGER NOT NULL, 
-	name VARCHAR(160) NOT NULL, 
-	circuit_id VARCHAR(80) NOT NULL, 
-	start_utc DATETIME NOT NULL, 
-	PRIMARY KEY (id), 
-	UNIQUE (season, round), 
-	CHECK (round > 0), 
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	season INTEGER NOT NULL,
+	round INTEGER NOT NULL,
+	name VARCHAR(160) NOT NULL,
+	circuit_id VARCHAR(80) NOT NULL,
+	start_utc DATETIME NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (season, round),
+	CHECK (round > 0),
 	FOREIGN KEY(circuit_id) REFERENCES circuits (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -60,93 +60,149 @@ CREATE INDEX ix_races_season ON races (season);
 CREATE INDEX ix_races_start_utc ON races (start_utc);
 
 CREATE TABLE entries (
-	race_id INTEGER NOT NULL, 
-	driver_id VARCHAR(80) NOT NULL, 
-	team_id VARCHAR(80) NOT NULL, 
-	PRIMARY KEY (race_id, driver_id), 
-	FOREIGN KEY(race_id) REFERENCES races (id), 
-	FOREIGN KEY(driver_id) REFERENCES drivers (id), 
+	race_id INTEGER NOT NULL,
+	driver_id VARCHAR(80) NOT NULL,
+	team_id VARCHAR(80) NOT NULL,
+	PRIMARY KEY (race_id, driver_id),
+	FOREIGN KEY(race_id) REFERENCES races (id),
+	FOREIGN KEY(driver_id) REFERENCES drivers (id),
 	FOREIGN KEY(team_id) REFERENCES teams (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE evaluation_metrics (
-	id INTEGER NOT NULL AUTO_INCREMENT, 
-	run_id VARCHAR(36) NOT NULL, 
-	race_id INTEGER, 
-	name VARCHAR(64) NOT NULL, 
-	value FLOAT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(run_id) REFERENCES model_runs (id), 
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	run_id VARCHAR(36) NOT NULL,
+	race_id INTEGER,
+	name VARCHAR(64) NOT NULL,
+	value FLOAT,
+	PRIMARY KEY (id),
+	FOREIGN KEY(run_id) REFERENCES model_runs (id),
 	FOREIGN KEY(race_id) REFERENCES races (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX ix_evaluation_metrics_run_id ON evaluation_metrics (run_id);
 
 CREATE TABLE sessions (
-	id VARCHAR(24) NOT NULL, 
-	race_id INTEGER NOT NULL, 
-	kind VARCHAR(4) NOT NULL, 
-	exported_at DATETIME NOT NULL, 
-	source VARCHAR(120) NOT NULL, 
-	PRIMARY KEY (id), 
-	UNIQUE (race_id, kind), 
-	UNIQUE (race_id, id), 
+	id VARCHAR(24) NOT NULL,
+	race_id INTEGER NOT NULL,
+	kind VARCHAR(4) NOT NULL,
+	exported_at DATETIME NOT NULL,
+	source VARCHAR(120) NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (race_id, kind),
+	UNIQUE (race_id, id),
 	FOREIGN KEY(race_id) REFERENCES races (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE weekend_sessions (
+	id VARCHAR(24) NOT NULL,
+	race_id INTEGER NOT NULL,
+	kind VARCHAR(4) NOT NULL,
+	start_utc DATETIME NOT NULL,
+	cutoff_utc DATETIME NOT NULL,
+	history_after_utc DATETIME NOT NULL,
+	collected_at DATETIME NOT NULL,
+	status VARCHAR(32) NOT NULL,
+	source VARCHAR(120) NOT NULL,
+	details JSON NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (race_id, kind),
+	FOREIGN KEY(race_id) REFERENCES races (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX ix_weekend_sessions_race_id ON weekend_sessions (race_id);
+
 CREATE TABLE feature_snapshots (
-	id VARCHAR(64) NOT NULL, 
-	race_id INTEGER NOT NULL, 
-	driver_id VARCHAR(80) NOT NULL, 
-	cutoff_utc DATETIME NOT NULL, 
-	version VARCHAR(32) NOT NULL, 
-	features JSON NOT NULL, 
-	label INTEGER, 
-	PRIMARY KEY (id), 
+	id VARCHAR(64) NOT NULL,
+	race_id INTEGER NOT NULL,
+	driver_id VARCHAR(80) NOT NULL,
+	cutoff_utc DATETIME NOT NULL,
+	version VARCHAR(32) NOT NULL,
+	features JSON NOT NULL,
+	label INTEGER,
+	PRIMARY KEY (id),
 	FOREIGN KEY(race_id, driver_id) REFERENCES entries (race_id, driver_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX ix_feature_snapshots_race_id ON feature_snapshots (race_id);
 
 CREATE TABLE session_results (
-	session_id VARCHAR(24) NOT NULL, 
-	driver_id VARCHAR(80) NOT NULL, 
-	race_id INTEGER NOT NULL, 
-	position INTEGER, 
-	q1_seconds FLOAT, 
-	q2_seconds FLOAT, 
-	q3_seconds FLOAT, 
-	points FLOAT, 
-	status VARCHAR(120), 
-	PRIMARY KEY (session_id, driver_id), 
-	FOREIGN KEY(race_id, session_id) REFERENCES sessions (race_id, id), 
-	FOREIGN KEY(race_id, driver_id) REFERENCES entries (race_id, driver_id), 
+	session_id VARCHAR(24) NOT NULL,
+	driver_id VARCHAR(80) NOT NULL,
+	race_id INTEGER NOT NULL,
+	position INTEGER,
+	q1_seconds FLOAT,
+	q2_seconds FLOAT,
+	q3_seconds FLOAT,
+	points FLOAT,
+	status VARCHAR(120),
+	PRIMARY KEY (session_id, driver_id),
+	FOREIGN KEY(race_id, session_id) REFERENCES sessions (race_id, id),
+	FOREIGN KEY(race_id, driver_id) REFERENCES entries (race_id, driver_id),
 	CHECK (position IS NULL OR position > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX ix_session_results_race_id ON session_results (race_id);
 
 CREATE TABLE weather_observations (
-	session_id VARCHAR(24) NOT NULL, 
-	elapsed_seconds FLOAT NOT NULL, 
-	air_temp FLOAT, 
-	track_temp FLOAT, 
-	humidity FLOAT, 
-	wind_speed FLOAT, 
-	rainfall INTEGER, 
-	PRIMARY KEY (session_id, elapsed_seconds), 
+	session_id VARCHAR(24) NOT NULL,
+	elapsed_seconds FLOAT NOT NULL,
+	air_temp FLOAT,
+	track_temp FLOAT,
+	humidity FLOAT,
+	wind_speed FLOAT,
+	rainfall INTEGER,
+	PRIMARY KEY (session_id, elapsed_seconds),
 	FOREIGN KEY(session_id) REFERENCES sessions (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE weekend_results (
+	session_id VARCHAR(24) NOT NULL,
+	driver_id VARCHAR(80) NOT NULL,
+	team_id VARCHAR(80) NOT NULL,
+	position INTEGER,
+	best_seconds FLOAT,
+	PRIMARY KEY (session_id, driver_id),
+	CHECK (position IS NULL OR position > 0),
+	FOREIGN KEY(session_id) REFERENCES weekend_sessions (id),
+	FOREIGN KEY(driver_id) REFERENCES drivers (id),
+	FOREIGN KEY(team_id) REFERENCES teams (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE weekend_runs (
+	id VARCHAR(36) NOT NULL,
+	session_id VARCHAR(24) NOT NULL,
+	created_at DATETIME NOT NULL,
+	cutoff_utc DATETIME NOT NULL,
+	model VARCHAR(80) NOT NULL,
+	artifact VARCHAR(512) NOT NULL,
+	details JSON NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY(session_id) REFERENCES weekend_sessions (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE predictions (
-	run_id VARCHAR(36) NOT NULL, 
-	snapshot_id VARCHAR(64) NOT NULL, 
-	score FLOAT NOT NULL, 
-	`rank` INTEGER NOT NULL, 
-	PRIMARY KEY (run_id, snapshot_id), 
-	CHECK (`rank` > 0), 
-	FOREIGN KEY(run_id) REFERENCES model_runs (id), 
+	run_id VARCHAR(36) NOT NULL,
+	snapshot_id VARCHAR(64) NOT NULL,
+	score FLOAT NOT NULL,
+	`rank` INTEGER NOT NULL,
+	PRIMARY KEY (run_id, snapshot_id),
+	CHECK (`rank` > 0),
+	FOREIGN KEY(run_id) REFERENCES model_runs (id),
 	FOREIGN KEY(snapshot_id) REFERENCES feature_snapshots (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE weekend_predictions (
+	run_id VARCHAR(36) NOT NULL,
+	driver_id VARCHAR(80) NOT NULL,
+	score FLOAT NOT NULL,
+	`rank` INTEGER NOT NULL,
+	actual_rank INTEGER,
+	features JSON NOT NULL,
+	PRIMARY KEY (run_id, driver_id),
+	CHECK (`rank` > 0),
+	FOREIGN KEY(run_id) REFERENCES weekend_runs (id),
+	FOREIGN KEY(driver_id) REFERENCES drivers (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE OR REPLACE VIEW prediction_comparison AS

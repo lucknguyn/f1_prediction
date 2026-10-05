@@ -1,5 +1,8 @@
 # F1 Race Predictor 2026
 
+**Cập nhật 06/10/2026:** đã có [dự đoán từng phiên trước cuối tuần](docs/DU_DOAN_CUOI_TUAN.md) cho FP1, FP2, FP3, Q, SQ, Sprint và Race, không cần Q của chặng hiện tại. Mở trang **Toàn bộ cuối tuần**. Chặng ngày 04/10 tại Malaysia đã được cập nhật. Nội dung Q → Race bên dưới là thí nghiệm riêng của v1.
+
+
 Đồ án kết hợp Machine Learning, cơ sở dữ liệu MySQL và web Python.
 
 **Trạng thái:** bản v1 đã chạy toàn bộ dữ liệu → MySQL → feature → huấn luyện → đánh giá → web. Có dữ liệu thật 2022–2025 và 15 chặng 2026 ở snapshot hiện tại; 13 chặng 2026 đủ điều kiện đánh giá. Không có dữ liệu hay metric giả.
